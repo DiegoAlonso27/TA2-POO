@@ -22,7 +22,7 @@ font_path = "fonts/Ubuntu/Ubuntu-Medium.ttf"
 font_size = 24
 
 # Crear la fuente
-font = pygame.font.Font(font_path, font_size)
+font = pygame.font.SysFont("comicsansms", 20)
 
 # Crear la ventana del juego
 window = pygame.display.set_mode((width, height))
@@ -38,28 +38,77 @@ direction = "RIGHT"
 change_to = direction
 score = 0
 
+# Variables de los botones
+restart_rect = pygame.Rect(0, 0, 0, 0)
+quit_rect = pygame.Rect(0, 0, 0, 0)
+
 # Función para mostrar el puntaje en la ventana
 
 
 def show_score():
     score_surface = font.render("Puntuación : " + str(score), True, white)
     score_rect = score_surface.get_rect()
-    score_rect.midtop = (width / 2, 10) # type: ignore
+    score_rect.midtop = (width / 2, 10)  # type: ignore
     window.blit(score_surface, score_rect)
+
+# Función para mostrar los botones en la ventana
+
+
+def show_buttons():
+    restart_surface = font.render("Reiniciar", True, white)
+    restart_rect = restart_surface.get_rect()
+    restart_rect.center = (width / 2, height / 2 - 20) # type: ignore
+    pygame.draw.rect(window, green, restart_rect)
+    window.blit(restart_surface, restart_rect)
+
+    quit_surface = font.render("Cerrar", True, white)
+    quit_rect = quit_surface.get_rect()
+    quit_rect.center = (width / 2, height / 2 + 20) # type: ignore
+    pygame.draw.rect(window, red, quit_rect)
+    window.blit(quit_surface, quit_rect)
 
 # Función principal del juego
 
 
 def game_over():
-    game_over_surface = font.render("¡Juego terminado!", True, white)
-    game_over_rect = game_over_surface.get_rect()
-    game_over_rect.midtop = (width / 2, height / 4) # type: ignore
-    window.fill(black)
-    window.blit(game_over_surface, game_over_rect)
-    show_score()
-    pygame.display.flip()
-    pygame.time.wait(2000)
-    pygame.quit()
+    while True:
+        # Gestión de eventos
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if restart_rect.collidepoint(mouse_pos):
+                    restart()
+                    return
+                elif quit_rect.collidepoint(mouse_pos):
+                    pygame.quit()
+                    return
+
+        game_over_surface = font.render("¡Juego terminado!", True, white)
+        game_over_rect = game_over_surface.get_rect()
+        game_over_rect.midtop = (width / 2, height / 4)  # type: ignore
+        window.fill(black)
+        window.blit(game_over_surface, game_over_rect)
+        show_score()
+        show_buttons()
+        pygame.display.flip()
+        pygame.time.Clock().tick(20)
+
+# Funcion para reiniciar el juego
+
+
+def restart():
+    global snake_position, snake_body, food_position, food_spawn, direction, change_to, score
+    snake_position = [100, 50]
+    snake_body = [[100, 50], [90, 50], [80, 50]]
+    food_position = [random.randrange(
+        1, width // 10) * 10, random.randrange(1, height // 10) * 10]
+    food_spawn = True
+    direction = "RIGHT"
+    change_to = direction
+    score = 0
 
 
 # Bucle principal del juego
